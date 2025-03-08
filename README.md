@@ -4,7 +4,21 @@ A serverless application that automatically checks the Williamson County, TX Pet
 
 ## Architecture
 
-![Architecture Diagram](https://mermaid.ink/img/pako:eNp1kMFqwzAMhl_F6JRB87ZdlkIhkJ3SQ3fouWgtL2bxHGM7hZC8-5wmW0sHPQj9-j59kmauHUeW8o6-NHTD5B1aNBlz54xFRXjFYLXXdMPQLRhO9x3eXU9PZ47DI33MXJtx7BzKYFqE3uJqVugH6QmbMm_KRZNZ3NaIxrbPNGJ7K6zRG-GVPiLSXfQOXZBNrpwTTrHOaTRUuq4o1ijvs-R8VKw6QUeLIXNl6BBzOFrRkhUBQ0A_-jXfKxKS4MjgJVfgFJ1bxpBKRePsrLvuBaWvgq_4hXdp5GyyNx9R2jMtR1ZaVe34L6VY6VWrqlOxP-yPh-lYsdL81FodVFEU1b4u1j_HVoBm?type=png)
+```mermaid
+graph TD
+    A[CloudWatch Events] -->|Triggers| B[Lambda Function]
+    B -->|Scrapes| C[Pet Shelter Website]
+    B -->|Filters| D[Puppies ≤6 months]
+    B -->|Sends Email| E[Amazon SES]
+    E -->|Delivers| F[Email Recipients]
+    
+    style A fill:#4e88d9,stroke:#2d5b96,stroke-width:2px,color:#ffffff
+    style B fill:#69b3a2,stroke:#498272,stroke-width:2px,color:#ffffff
+    style C fill:#b5838d,stroke:#8b6169,stroke-width:2px,color:#ffffff
+    style D fill:#ffb347,stroke:#cc8f39,stroke-width:2px,color:#ffffff
+    style E fill:#4e88d9,stroke:#2d5b96,stroke-width:2px,color:#ffffff
+    style F fill:#6c757d,stroke:#495057,stroke-width:2px,color:#ffffff
+```
 
 The system consists of:
 
