@@ -14,6 +14,6 @@ output "sender_email_identity" {
   value = aws_ses_email_identity.sender.email
 }
 
-output "recipient_email_identity" {
-  value = aws_ses_email_identity.recipients.email
+output "recipient_email_identities" {
+  value = [for identity in aws_ses_email_identity.recipients : identity.email]
 }
