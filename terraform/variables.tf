@@ -11,9 +11,9 @@ variable "email_from" {
 }
 
 variable "email_to" {
-  description = "Email address to send notifications to"
-  type        = string
-  default     = "j.scott.cronin@gmail.com"
+  description = "Email addresses to send notifications to"
+  type        = list(string)
+  default     = ["j.scott.cronin@gmail.com", "rin2036@gmail.com"]
 }
 
 variable "schedule_expression" {
