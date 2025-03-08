@@ -93,7 +93,7 @@ resource "aws_lambda_function" "puppy_adoption_lambda" {
   environment {
     variables = {
       EMAIL_FROM = var.email_from
-      EMAIL_TO   = var.email_to
+      EMAIL_TO   = join(",", var.email_to)
     }
   }
 

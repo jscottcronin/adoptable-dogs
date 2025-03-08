@@ -147,6 +147,9 @@ def send_email(filtered_dogs):
         logger.error("Email configuration missing. Check environment variables.")
         raise Exception("Email configuration missing. Check environment variables.")
 
+    # Convert EMAIL_TO to list if it's a comma-separated string
+    email_recipients = EMAIL_TO.split(",") if isinstance(EMAIL_TO, str) else EMAIL_TO
+
     if not filtered_dogs:
         body = "<p>No young adoptable dogs today.</p>"
         logger.info("No puppies found to report")
@@ -166,13 +169,15 @@ def send_email(filtered_dogs):
         </body>
         </html>
         """
-        logger.info(f"Sending email with {len(filtered_dogs)} puppies")
+        logger.info(
+            f"Sending email with {len(filtered_dogs)} puppies to {len(email_recipients)} recipients"
+        )
 
     try:
         logger.info("Attempting to send email through SES")
         response = SES_CLIENT.send_email(
             Source=EMAIL_FROM,
-            Destination={"ToAddresses": [EMAIL_TO]},
+            Destination={"ToAddresses": email_recipients},
             Message={
                 "Subject": {"Data": SUBJECT},
                 "Body": {"Html": {"Data": body}},

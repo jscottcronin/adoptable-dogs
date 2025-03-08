@@ -4,8 +4,9 @@ resource "aws_ses_email_identity" "sender" {
 }
 
 # Verify recipient email identity
-resource "aws_ses_email_identity" "recipient" {
-  email = var.email_to
+resource "aws_ses_email_identity" "recipients" {
+  for_each = toset(var.email_to)
+  email    = each.value
 }
 
 # Output email identities 
@@ -14,5 +15,5 @@ output "sender_email_identity" {
 }
 
 output "recipient_email_identity" {
-  value = aws_ses_email_identity.recipient.email
+  value = aws_ses_email_identity.recipients.email
 }
