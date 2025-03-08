@@ -1,2 +1,2 @@
 # adoptable-dogs
-Daily Feed to be notified when new puppies are up for adoption from Williamson County Pet Shelter
+"This project fetches and filters adoptable puppies in Williamson County, TX daily, sending an email via AWS SES."
