@@ -1,15 +1,19 @@
 # Use a null_resource to install dependencies
 resource "null_resource" "install_dependencies" {
   triggers = {
+    # Track changes to both requirements.txt and main.py
     requirements_hash = filemd5("${path.module}/../lambda/requirements.txt")
+    lambda_hash       = filemd5("${path.module}/../lambda/main.py")
   }
 
   provisioner "local-exec" {
     command = <<EOT
+      rm -rf ${path.module}/lambda_build
       mkdir -p ${path.module}/lambda_build
-      cp -r ${path.module}/../lambda/* ${path.module}/lambda_build/
-      cd ${path.module}/lambda_build
-      pip install -r requirements.txt -t .
+      cp ${path.module}/../lambda/main.py ${path.module}/lambda_build/
+      cp ${path.module}/../lambda/requirements.txt ${path.module}/lambda_build/
+      pip install -r ${path.module}/lambda_build/requirements.txt -t ${path.module}/lambda_build/
+      rm -f ${path.module}/lambda_build/requirements.txt
     EOT
   }
 }

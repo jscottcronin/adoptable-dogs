@@ -58,7 +58,7 @@ def fetch_and_filter_dogs():
                     f"Processing dog: {name}, Age: {age_text} ({total_months} months)"
                 )
 
-                if total_months <= 6:
+                if total_months < 6:  # Change to filter puppies < 6 months old
                     link_element = dog.find("a")
                     img_element = dog.find("img")
 
@@ -72,7 +72,7 @@ def fetch_and_filter_dogs():
                     else:
                         logger.warning(f"Missing link or image for dog: {name}")
 
-    logger.info(f"Filtered to {len(filtered_dogs)} puppies (≤1 year old)")
+    logger.info(f"Filtered to {len(filtered_dogs)} puppies (< 6 months old)")
     return filtered_dogs
 
 
@@ -90,7 +90,7 @@ def send_email(filtered_dogs):
         body = "<p>No young adoptable dogs today.</p>"
         logger.info("No puppies found to report")
     else:
-        body = "<h3>Adoptable Puppies (≤1 Year)</h3>" + "".join(filtered_dogs)
+        body = "<h3>Adoptable Puppies (< 6 Months)</h3>" + "".join(filtered_dogs)
         logger.info(f"Sending email with {len(filtered_dogs)} puppies")
 
     try:

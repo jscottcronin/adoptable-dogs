@@ -19,7 +19,7 @@ variable "email_to" {
 variable "schedule_expression" {
   description = "CloudWatch Events schedule expression for when to run the Lambda"
   type        = string
-  default     = "cron(0 12 * * ? *)" # Runs daily at 12:00 PM UTC
+  default     = "cron(0 13,17,20 * * ? *)" # Runs at 8am, 12pm, and 3pm CST (converted to UTC)
 }
 
 variable "lambda_timeout" {
