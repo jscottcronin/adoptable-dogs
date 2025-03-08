@@ -58,19 +58,80 @@ def fetch_and_filter_dogs():
                     f"Processing dog: {name}, Age: {age_text} ({total_months} months)"
                 )
 
-                if total_months < 6:  # Change to filter puppies < 6 months old
+                if total_months < 6:  # Changed to filter puppies < 6 months old
                     link_element = dog.find("a")
-                    img_element = dog.find("img")
 
-                    if link_element and img_element:
-                        link = link_element["href"]
-                        img = img_element["src"]
-                        logger.info(f"Adding puppy {name} to filtered list")
-                        filtered_dogs.append(
-                            f"<p><b>{name}</b> - {age_text} <br><a href='{link}'>More Info</a><br><img src='{img}' width='150'></p>"
-                        )
-                    else:
-                        logger.warning(f"Missing link or image for dog: {name}")
+                    if link_element:
+                        # Extract the real URL from the JavaScript link
+                        js_href = link_element["href"]
+                        # Use regex to extract the URL inside the poptastic function
+                        url_match = re.search(r"poptastic\('([^']+)'\)", js_href)
+
+                        if url_match:
+                            # Get the relative URL from the match
+                            relative_url = url_match.group(1)
+                            # Create an absolute URL by combining with the base URL
+                            base_url = (
+                                "https://ws.petango.com/webservices/adoptablesearch/"
+                            )
+                            detail_url = base_url + relative_url
+
+                            # Fetch the detail page for this dog
+                            logger.info(
+                                f"Fetching details for dog {name} from {detail_url}"
+                            )
+                            try:
+                                detail_response = requests.get(detail_url)
+                                if detail_response.status_code == 200:
+                                    detail_soup = BeautifulSoup(
+                                        detail_response.text, "html.parser"
+                                    )
+
+                                    # Extract the DefaultLayoutDiv
+                                    default_layout_div = detail_soup.find(
+                                        id="DefaultLayoutDiv"
+                                    )
+                                    if default_layout_div:
+                                        # Add the dog details to our filtered list
+                                        logger.info(
+                                            f"Adding puppy {name} with full details to filtered list"
+                                        )
+
+                                        # Fix relative URLs to absolute
+                                        for img in default_layout_div.find_all("img"):
+                                            if img.get("src") and img["src"].startswith(
+                                                "../"
+                                            ):
+                                                img["src"] = (
+                                                    "https://ws.petango.com/"
+                                                    + img["src"].replace("../", "")
+                                                )
+                                            elif img.get("src") and img[
+                                                "src"
+                                            ].startswith("images/"):
+                                                img["src"] = base_url + img["src"]
+
+                                        # Convert the div to string for email
+                                        dog_details = str(default_layout_div)
+                                        filtered_dogs.append(
+                                            f"<div style='margin-bottom:30px; border-bottom:1px solid #ccc; padding-bottom:20px;'>{dog_details}</div>"
+                                        )
+                                    else:
+                                        logger.warning(
+                                            f"DefaultLayoutDiv not found for dog {name}"
+                                        )
+                                else:
+                                    logger.error(
+                                        f"Failed to fetch detail page: {detail_response.status_code}"
+                                    )
+                            except Exception as e:
+                                logger.error(
+                                    f"Error fetching details for {name}: {str(e)}"
+                                )
+                        else:
+                            logger.warning(
+                                f"Could not parse detail URL from JavaScript link for dog {name}"
+                            )
 
     logger.info(f"Filtered to {len(filtered_dogs)} puppies (< 6 months old)")
     return filtered_dogs
@@ -90,7 +151,21 @@ def send_email(filtered_dogs):
         body = "<p>No young adoptable dogs today.</p>"
         logger.info("No puppies found to report")
     else:
-        body = "<h3>Adoptable Puppies (< 6 Months)</h3>" + "".join(filtered_dogs)
+        body = f"""
+        <html>
+        <head>
+            <style>
+                body {{ font-family: Arial, sans-serif; }}
+                h1 {{ color: #333366; }}
+                .dog-container {{ margin-bottom: 30px; border-bottom: 1px solid #ccc; padding-bottom: 20px; }}
+            </style>
+        </head>
+        <body>
+            <h1>Adoptable Puppies (< 6 Months) - {len(filtered_dogs)} Found</h1>
+            {"".join(filtered_dogs)}
+        </body>
+        </html>
+        """
         logger.info(f"Sending email with {len(filtered_dogs)} puppies")
 
     try:
